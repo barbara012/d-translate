@@ -99,3 +99,20 @@
       24px 0px 0px 0px #465264;
   }
 }
+@media (prefers-color-scheme: dark) {
+  .hwh_hlw_select_menu {
+    background-color: #343434;
+  }
+  .hwh_hlw_select_menu button {
+    background-color: #343434;
+  }
+  .hwh_hlw_select_menu button:hover {
+    background-color: #555;
+  }
+  .hwh_hlw_result_panel {
+    background-color: #343434;
+  }
+  .hwh_hlw_result_panel_content {
+    color: #fff;
+  }
+}
