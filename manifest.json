@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "狗翻译",
+  "description": "胡萝卜的翻译",
+  "version": "1.0",
+  "icons": {
+    "16": "images/hlw_c.png",
+    "32": "images/hlw_c.png",
+    "48": "images/hlw_c.png",
+    "128": "images/hlw_c.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": "images/hlw_c.png"
+  },
+  "permissions": [
+    "scripting",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "scripts/content.js"
+      ],
+      "css": [
+        "scripts/style.css"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+B",
+        "mac": "Command+B"
+      }
+    }
+  }
+}

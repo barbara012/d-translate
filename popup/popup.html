@@ -1,0 +1,40 @@
+<html lang="zh-CN">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" href="index.css">
+
+<body>
+  <div class="form">
+    <div class="form_body">
+      <div class="sourceWrapper">
+        <div class="title">自动</div>
+        <textarea name="text" autofocus id="text" placeholder="Type to translate" cols="30" rows="10"></textarea>
+
+        <div class="subWraper">
+          <span>Cmd + Enter or</span>
+          <button id="btn">翻译</button>
+        </div>
+      </div>
+      <div class="sourceWrapper">
+        <div class="title">
+          <select name="language" id="language">
+            <option value="ZH">🇨🇳中文</option>
+            <option value="EN">🇬🇧英语</option>
+            <option value="RU">🇷🇺俄语</option>
+            <option value="DE">🇩🇪德语</option>
+            <option value="FR">🇫🇷法语</option>
+            <option value="JA">🇯🇵日语</option>
+          </select>
+        </div>
+        <textarea name="result" id="result" cols="30" rows="10"></textarea>
+        <div class="alternatives" id="alternatives"></div>
+        <div class="translating hide" id="translating">
+          <div class="typing_loader"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="popup.js"></script>
+</body>
+
+</html>
