@@ -103,7 +103,9 @@
   .hwh_hlw_select_menu {
     background-color: #343434;
   }
+  .hwh_hlw_select_menu select,
   .hwh_hlw_select_menu button {
+    color: #fff;
     background-color: #343434;
   }
   .hwh_hlw_select_menu button:hover {
@@ -111,6 +113,9 @@
   }
   .hwh_hlw_result_panel {
     background-color: #343434;
+  }
+  .hwh_hlw_result_panel_title {
+    color: #fff;
   }
   .hwh_hlw_result_panel_content {
     color: #fff;
