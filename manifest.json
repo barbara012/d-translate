@@ -33,16 +33,6 @@
       ]
     }
   ],
-  "web_accessible_resources": [
-    {
-      "matches": [
-        "<all_urls>"
-      ],
-      "resources": [
-        "scripts/const.js"
-      ]
-    }
-  ],
   "commands": {
     "_execute_action": {
       "suggested_key": {
