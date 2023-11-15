@@ -188,6 +188,8 @@ const generateSelectMenus = () => {
   btn.addEventListener('click', buttonClickHandle);
   shadow.appendChild(toolStyle);
   shadow.appendChild(selectMenus);
+
+  wrapper.style.zIndex = 9998;
   document.body.appendChild(wrapper);
   translateToolEle = wrapper;
   return wrapper;
@@ -206,6 +208,7 @@ const generateResultPanel = (result) => {
     panelEle.classList.add(ResultPanelClassName);
     shadow.appendChild(resultPanelStyle);
     shadow.appendChild(panelEle);
+    resultPanelEle.style.zIndex = 9999;
     document.body.appendChild(resultPanelEle);
   } else {
     shadow = resultPanelEle.shadowRoot;
