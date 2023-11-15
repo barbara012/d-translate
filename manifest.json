@@ -14,8 +14,7 @@
     "default_icon": "images/hlw_c.png"
   },
   "permissions": [
-    "scripting",
-    "activeTab"
+    "scripting"
   ],
   "background": {
     "service_worker": "background.js"
