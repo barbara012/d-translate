@@ -146,11 +146,15 @@ const buttonClickHandle = () => {
     chrome.runtime.sendMessage(
       { message: 'translate', text: hwh_currentSelectText, targetLang },
       (response) => {
-        // 处理翻译结果或错误
-        if (response && response.result) {
-          generateResultPanel(response.result.data);
-        } else if (response && response.error) {
-          console.error('Error:', response.error);
+        if (!window.chrome.runtime.lastError) {
+          // 处理翻译结果或错误
+          if (response && response.result) {
+            generateResultPanel(response.result.data);
+          } else if (response && response.error) {
+            console.error('Error:', response.error);
+          }
+        } else {
+          console.log('error', window.chrome.runtime.lastError);
         }
       }
     );
@@ -258,7 +262,6 @@ const hide = () => {
     resultPanelEle.style.display = 'none';
   }
 };
-
 document.addEventListener('mouseup', function (event) {
   const target = event.target;
   const classList = target.classList;

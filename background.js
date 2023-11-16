@@ -57,8 +57,7 @@ const deeplxTrans = (text, targetLang) => {
   });
 };
 
-// 监听
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.message === 'translate') {
     // 获取文本框的内容
     const textToTranslate = request.text;
@@ -87,3 +86,5 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     return true;
   }
 });
+// Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist
+// Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
