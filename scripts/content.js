@@ -15,6 +15,7 @@ const TranslateToolStyle = `
   border-radius: 4px;
   overflow: hidden;
   z-index: 9998;
+  font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
   box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0px 2px 4px -2px;
 }
 .hwh_hlw_select_menu button {
@@ -70,6 +71,8 @@ const ResultPanelStyle = `
   max-height: 70vh;
   overflow: auto;
   z-index: 9999;
+  line-height: 1.5;
+  font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
   box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0px 2px 4px -2px;
 }
 .hwh_hlw_result_panel_title {
@@ -139,25 +142,12 @@ let hwh_currentMenuPosY = 0;
 
 let hwh_currentSelectText = '';
 let targetLang = 'ZH';
+let port = null;
 
 const buttonClickHandle = () => {
-  if (hwh_currentSelectText) {
+  if (hwh_currentSelectText && port) {
     generateResultPanel();
-    chrome.runtime.sendMessage(
-      { message: 'translate', text: hwh_currentSelectText, targetLang },
-      (response) => {
-        if (!window.chrome.runtime.lastError) {
-          // 处理翻译结果或错误
-          if (response && response.result) {
-            generateResultPanel(response.result.data);
-          } else if (response && response.error) {
-            console.error('Error:', response.error);
-          }
-        } else {
-          console.log('error', window.chrome.runtime.lastError);
-        }
-      }
-    );
+    port.postMessage({message: 'translate', text: hwh_currentSelectText, targetLang});
   }
 };
 
@@ -169,7 +159,7 @@ const langChange = (e) => {
 const generateSelectMenus = () => {
   if (translateToolEle) return translateToolEle;
   const wrapper = document.createElement('div');
-  const shadow = wrapper.attachShadow({ mode: 'open' });
+  const shadow = wrapper.attachShadow({mode: 'open'});
   const toolStyle = document.createElement('style');
   toolStyle.textContent = TranslateToolStyle;
   const selectMenus = document.createElement('div');
@@ -205,7 +195,7 @@ const generateResultPanel = (result) => {
   if (!resultPanelEle) {
     resultPanelEle = document.createElement('div');
     resultPanelEle.classList.add(EventBlockClassName);
-    shadow = resultPanelEle.attachShadow({ mode: 'open' });
+    shadow = resultPanelEle.attachShadow({mode: 'open'});
     const resultPanelStyle = document.createElement('style');
     resultPanelStyle.textContent = ResultPanelStyle;
     panelEle = document.createElement('div');
@@ -221,7 +211,7 @@ const generateResultPanel = (result) => {
   const w = window.innerWidth;
   const h = window.innerHeight;
   if (result) {
-    panelEle.innerHTML = `<div class="hwh_hlw_result_panel_title">翻译结果</div><div class="hwh_hlw_result_panel_content">${result}</div>`;
+    panelEle.innerHTML = `<div class="hwh_hlw_result_panel_title">译文：</div><div class="hwh_hlw_result_panel_content">${result}</div>`;
     setTimeout(() => {
       // 获取元素的宽高
       const ow = panelEle.offsetWidth;
@@ -291,3 +281,22 @@ document.addEventListener('mouseup', function (event) {
     hide();
   }
 });
+
+function connectToBackground() {
+  port = chrome.runtime.connect({name: 'hwh_hlw_content_script'});
+
+  port.onDisconnect.addListener(function () {
+    console.log('Connection to background invalidated. Reconnecting...');
+    connectToBackground();
+  });
+
+  port.onMessage.addListener(function (data) {
+    if (data && data.result) {
+      generateResultPanel(data.result.data);
+    } else if (response && response.error) {
+      console.error('Error:', response.error);
+    }
+  });
+}
+
+connectToBackground();
