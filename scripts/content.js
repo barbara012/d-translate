@@ -102,6 +102,11 @@ const ResultPanelStyle = `
   position: relative;
   left: -12px;
 }
+.hwh_hlw_speak_btn {
+  display: inline-block;
+  margin-top: 4px;
+  cursor: pointer;
+}
 
 @keyframes typing {
   0% {
@@ -135,6 +140,15 @@ const ResultPanelStyle = `
 }
 `;
 
+const LangMap = {
+  EN: 'en-US',
+  ZH: 'zh-CN',
+  FR: 'fr-FR',
+  DE: 'de-DE',
+  RU: 'ru-RU',
+  JA: 'ja-JP'
+};
+
 let translateToolEle = null;
 let resultPanelEle = null;
 let hwh_currentMenuPosX = 0;
@@ -156,6 +170,16 @@ const langChange = (e) => {
   buttonClickHandle();
 };
 
+const speak = (text, lang) => {
+  if (port) {
+    port.postMessage({
+      message: 'speak',
+      text: text,
+      targetLang: lang
+    });
+  }
+};
+
 const generateSelectMenus = () => {
   if (translateToolEle) return translateToolEle;
   const wrapper = document.createElement('div');
@@ -164,6 +188,7 @@ const generateSelectMenus = () => {
   toolStyle.textContent = TranslateToolStyle;
   const selectMenus = document.createElement('div');
   const btn = document.createElement('button');
+  const speakBtn = document.createElement('button');
   const select = document.createElement('select');
   select.innerHTML = `<option value="ZH">🇨🇳中文</option>
   <option value="EN">🇬🇧英语</option>
@@ -176,10 +201,15 @@ const generateSelectMenus = () => {
   btn.classList.add([TranslateBtnClassName, EventBlockClassName]);
   select.classList.add([SelectLangClassName, EventBlockClassName]);
   btn.innerHTML = '<span>🐶</span>翻译';
+  speakBtn.innerText = '🔊';
   selectMenus.appendChild(btn);
   selectMenus.appendChild(select);
+  selectMenus.appendChild(speakBtn);
   select.addEventListener('change', langChange);
   btn.addEventListener('click', buttonClickHandle);
+  speakBtn.addEventListener('click', (e) => {
+    speak(hwh_currentSelectText);
+  });
   shadow.appendChild(toolStyle);
   shadow.appendChild(selectMenus);
 
@@ -212,6 +242,14 @@ const generateResultPanel = (result) => {
   const h = window.innerHeight;
   if (result) {
     panelEle.innerHTML = `<div class="hwh_hlw_result_panel_title">译文：</div><div class="hwh_hlw_result_panel_content">${result}</div>`;
+    const btn = document.createElement('span');
+    btn.classList.add('hwh_hlw_speak_btn');
+    btn.innerText = '🔊';
+    panelEle.appendChild(btn);
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      speak(result, LangMap[targetLang]);
+    });
     setTimeout(() => {
       // 获取元素的宽高
       const ow = panelEle.offsetWidth;
@@ -270,8 +308,8 @@ document.addEventListener('mouseup', function (event) {
     menus.style.position = 'fixed';
     menus.style.display = 'block';
     const w = window.innerWidth;
-    if (w - hwh_currentMenuPosX < 100) {
-      hwh_currentMenuPosX = w - 110;
+    if (w - hwh_currentMenuPosX < 120) {
+      hwh_currentMenuPosX = w - 130;
     }
     menus.style.top = hwh_currentMenuPosY + 'px';
     menus.style.left = hwh_currentMenuPosX + 'px';

@@ -58,10 +58,10 @@ const deeplxTrans = (text, targetLang) => {
 };
 
 chrome.runtime.onConnect.addListener(function (port) {
-  if (port.name !== 'hwh_hlw_content_script-script')
-    // 接收来自 content script 的消息
-    port.onMessage.addListener(function (data) {
-      console.log('Received message from content script:', data.message);
+  if (port.name !== 'hwh_hlw_content_script') return;
+  // 接收来自 content script 的消息
+  port.onMessage.addListener(function (data) {
+    if (data.message === 'translate') {
       deeplxTrans(data.text, data.targetLang)
         .then((data) => {
           port.postMessage({
@@ -70,7 +70,7 @@ chrome.runtime.onConnect.addListener(function (port) {
           });
         })
         .catch(() => {
-          googleTrans(textToTranslate, request.targetLang)
+          googleTrans(data.text, data.targetLang)
             .then((data) => {
               port.postMessage({
                 message: 'translate',
@@ -84,25 +84,13 @@ chrome.runtime.onConnect.addListener(function (port) {
               });
             });
         });
-      // 在这里处理消息，可以进行一些逻辑操作
-
-      // 回复消息
-      // port.postMessage({response: 'Hello from background!'});
-    });
+    } else if (data.message === 'speak') {
+      chrome.tts.speak(data.text, data.targetLang ? {lang: data.targetLang} : undefined);
+    }
+  });
 
   // 当连接断开时
   port.onDisconnect.addListener(function () {
     console.log('Connection to content script disconnected.');
   });
 });
-
-// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-//   if (request.message === 'translate') {
-//     // 获取文本框的内容
-//     const textToTranslate = request.text;
-
-//     return true;
-//   }
-// });
-// Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist
-// Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.

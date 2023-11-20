@@ -50,15 +50,19 @@ body {
 .sourceWrapper:first-child {
   border-right: 1px solid #f1f5f9;
 }
-
+.textarea,
 textarea {
   width: 100%;
   flex: 1;
   padding: 12px;
   line-height: 1.5;
+  font-size: 14px;
   border-color: transparent;
   outline: none;
   resize: none;
+}
+.textarea {
+  min-height: 20px;
 }
 
 .sourceWrapper:last-child textarea {

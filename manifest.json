@@ -16,6 +16,9 @@
   "host_permissions": [
     "<all_urls>"
   ],
+  "permissions": [
+    "tts"
+  ],
   "background": {
     "service_worker": "background.js"
   },
