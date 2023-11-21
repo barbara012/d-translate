@@ -29,7 +29,8 @@
       ],
       "matches": [
         "<all_urls>"
-      ]
+      ],
+      "all_frames": true
     }
   ],
   "web_accessible_resources": [
