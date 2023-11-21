@@ -19,13 +19,29 @@ const TranslateToolStyle = `
   box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0px 2px 4px -2px;
 }
 .hwh_hlw_select_menu button {
-  padding: 0 4px;
+  position: relative;
+  padding: 0 8px;
   white-space: nowrap;
   height: 24px;
   outline: none;
   font-size: 12px;
   border: none;
   cursor: pointer;
+  background-color: #fff;
+}
+.hwh_hlw_select_menu button::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  height: 8px;
+  width: 1px;
+  background-color: #cdcdcd;
+}
+.hwh_hlw_select_menu .hwh_hlw_translate_btn::before {
+  right: 0;
+}
+.hwh_hlw_select_menu .hwh_hlw_speak_btn::before {
+  left: 0;
 }
 .hwh_hlw_select_menu select {
   border: none;
@@ -42,6 +58,14 @@ const TranslateToolStyle = `
 .hwh_hlw_select_menu span {
   margin-right: 4px;
   pointer-events: none;
+}
+.hwh_hlw_speak_btn  {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.hwh_hlw_speak_btn img {
+  width: 16px;
 }
 @media (prefers-color-scheme: dark) {
   .hwh_hlw_select_menu {
@@ -106,6 +130,9 @@ const ResultPanelStyle = `
   display: inline-block;
   margin-top: 4px;
   cursor: pointer;
+}
+.hwh_hlw_speak_btn img {
+  width: 16px;
 }
 
 @keyframes typing {
@@ -198,10 +225,13 @@ const generateSelectMenus = () => {
   <option value="JA">🇯🇵日语</option>`;
   wrapper.classList.add(EventBlockClassName);
   selectMenus.classList.add(SelectMenuClassName);
-  btn.classList.add([TranslateBtnClassName, EventBlockClassName]);
-  select.classList.add([SelectLangClassName, EventBlockClassName]);
+  btn.classList.add(TranslateBtnClassName);
+  btn.classList.add(EventBlockClassName);
+  select.classList.add(SelectLangClassName);
+  select.classList.add(EventBlockClassName);
   btn.innerHTML = '<span>🐶</span>翻译';
-  speakBtn.innerText = '🔊';
+  speakBtn.innerHTML = `<img src="${chrome.runtime.getURL('read.svg')}"/>`;
+  speakBtn.classList.add('hwh_hlw_speak_btn');
   selectMenus.appendChild(btn);
   selectMenus.appendChild(select);
   selectMenus.appendChild(speakBtn);
@@ -244,7 +274,7 @@ const generateResultPanel = (result) => {
     panelEle.innerHTML = `<div class="hwh_hlw_result_panel_title">译文：</div><div class="hwh_hlw_result_panel_content">${result}</div>`;
     const btn = document.createElement('span');
     btn.classList.add('hwh_hlw_speak_btn');
-    btn.innerText = '🔊';
+    btn.innerHTML = `<img src="${chrome.runtime.getURL('read.svg')}"/>`;
     panelEle.appendChild(btn);
     btn.addEventListener('click', (e) => {
       e.stopPropagation();

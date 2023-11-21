@@ -25,10 +25,17 @@
   "content_scripts": [
     {
       "js": [
-        "scripts/content.js"
+        "content.js"
       ],
-      "css": [
-        "scripts/style.css"
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "read.svg"
       ],
       "matches": [
         "<all_urls>"
