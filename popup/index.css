@@ -70,6 +70,7 @@ textarea {
 }
 
 .subWraper {
+  position: relative;
   justify-content: flex-end;
   display: flex;
   align-items: center;
@@ -131,6 +132,11 @@ select {
   margin: 46px auto;
   position: relative;
   left: -12px;
+}
+.speak-btn {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
 }
 
 @keyframes typing {
