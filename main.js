@@ -3,6 +3,7 @@ const ResultPanelClassName = 'hwh_hlw_result_panel';
 const TranslateBtnClassName = 'hwh_hlw_translate_btn';
 const SelectLangClassName = 'hwh_hlw_select_lang';
 const EventBlockClassName = 'e_block_' + Date.now();
+
 const TranslateToolStyle = `
 .hwh_hlw_select_menu * {
   box-sizing: border-box;
@@ -33,15 +34,10 @@ const TranslateToolStyle = `
   content: "";
   position: absolute;
   top: 8px;
+  right: 0;
   height: 8px;
   width: 1px;
   background-color: #cdcdcd;
-}
-.hwh_hlw_select_menu .hwh_hlw_translate_btn::before {
-  right: 0;
-}
-.hwh_hlw_select_menu .hwh_hlw_speak_btn::before {
-  left: 0;
 }
 .hwh_hlw_select_menu select {
   border: none;
@@ -102,6 +98,30 @@ const ResultPanelStyle = `
 .hwh_hlw_result_panel_title {
   pointer-events: none;
   font-weight: bold;
+  margin-bottom: 4px;
+}
+.hwh_hlw_original_text {
+  font-size: 14px;
+  line-height: 1;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+.hwh_hlw_phonetic {
+  min-width: 40px;
+  height: 20px;
+  font-size: 12px;
+  background-color: #f4f4f4;
+  margin-top: 4px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-conten
+}
+.hwh_hlw_phonetic {
+  t: center;
+  gap: 4px;
 }
 .hwh_hlw_result_panel_content {
   color: #444;
@@ -127,12 +147,15 @@ const ResultPanelStyle = `
   left: -12px;
 }
 .hwh_hlw_speak_btn {
+  height: 16px;
   display: inline-block;
-  margin-top: 4px;
   cursor: pointer;
 }
+.result_speak_btn {
+  margin-top: 4px;
+}
 .hwh_hlw_speak_btn img {
-  width: 16px;
+  height: 100%;
 }
 
 @keyframes typing {
@@ -167,6 +190,12 @@ const ResultPanelStyle = `
 }
 `;
 
+const BaiDuAppId = '20231122001888376';
+// 密钥
+const BaiDuKey = 'oikztxg1Afbn8vlgyT6B';
+
+const BaiDuSalt = 'hwh_hlw';
+
 const LangMap = {
   EN: 'en-US',
   ZH: 'zh-CN',
@@ -178,6 +207,7 @@ const LangMap = {
 
 let translateToolEle = null;
 let resultPanelEle = null;
+let phoneticEle = null;
 let hwh_currentMenuPosX = 0;
 let hwh_currentMenuPosY = 0;
 
@@ -185,19 +215,26 @@ let hwh_currentSelectText = '';
 let targetLang = 'ZH';
 let port = null;
 
+// 获取翻译结果
 const buttonClickHandle = () => {
   if (hwh_currentSelectText && port) {
     generateResultPanel();
-    port.postMessage({message: 'translate', text: hwh_currentSelectText, targetLang});
+    port.postMessage({
+      message: 'translate',
+      text: hwh_currentSelectText,
+      targetLang
+    });
   }
 };
 
+// 语言切换
 const langChange = (e) => {
   targetLang = e.target.value;
   buttonClickHandle();
 };
 
-const speak = (text, lang) => {
+// 获取拼读语音
+const speak = (text, lang, tts) => {
   if (port) {
     port.postMessage({
       message: 'speak',
@@ -205,6 +242,14 @@ const speak = (text, lang) => {
       targetLang: lang
     });
   }
+};
+
+// 判断一个是不是单词 用空格分割或者_。如果是中文就不用判断了
+const isWord = (text) => {
+  if (text.match(/[\u4e00-\u9fa5]/)) {
+    return false;
+  }
+  return text.split(/[\s_]/).length === 1;
 };
 
 const generateSelectMenus = () => {
@@ -215,7 +260,6 @@ const generateSelectMenus = () => {
   toolStyle.textContent = TranslateToolStyle;
   const selectMenus = document.createElement('div');
   const btn = document.createElement('button');
-  const speakBtn = document.createElement('button');
   const select = document.createElement('select');
   select.innerHTML = `<option value="ZH">🇨🇳中文</option>
   <option value="EN">🇬🇧英语</option>
@@ -230,19 +274,13 @@ const generateSelectMenus = () => {
   select.classList.add(SelectLangClassName);
   select.classList.add(EventBlockClassName);
   btn.innerHTML = '<span>🐶</span>翻译';
-  speakBtn.innerHTML = `<img src="${chrome.runtime.getURL('read.svg')}"/>`;
-  speakBtn.classList.add('hwh_hlw_speak_btn');
   selectMenus.appendChild(btn);
   selectMenus.appendChild(select);
-  selectMenus.appendChild(speakBtn);
   select.addEventListener('change', langChange);
   btn.addEventListener('click', buttonClickHandle);
-  speakBtn.addEventListener('click', (e) => {
-    speak(hwh_currentSelectText);
-  });
+
   shadow.appendChild(toolStyle);
   shadow.appendChild(selectMenus);
-
   wrapper.style.zIndex = 9998;
   document.body.appendChild(wrapper);
   translateToolEle = wrapper;
@@ -271,15 +309,48 @@ const generateResultPanel = (result) => {
   const w = window.innerWidth;
   const h = window.innerHeight;
   if (result) {
-    panelEle.innerHTML = `<div class="hwh_hlw_result_panel_title">译文：</div><div class="hwh_hlw_result_panel_content">${result}</div>`;
+    const fragm = document.createDocumentFragment();
+
+    if (isWord(hwh_currentSelectText)) {
+      // original text
+      const original = document.createElement('div');
+      original.classList.add('hwh_hlw_original_text');
+      original.innerHTML = `<div>${hwh_currentSelectText}</div>`;
+
+      // 音标
+      const phonetic = document.createElement('div');
+      phonetic.classList.add('hwh_hlw_phonetic');
+      phonetic.innerText = '';
+      original.appendChild(phonetic);
+      fragm.appendChild(original);
+      phoneticEle = phonetic;
+    }
+
+    // title
+    const title = document.createElement('div');
+    title.classList.add('hwh_hlw_result_panel_title');
+    title.innerText = '译文：';
+    fragm.appendChild(title);
+
+    // content
+    const content = document.createElement('div');
+    content.classList.add('hwh_hlw_result_panel_content');
+    content.innerText = result;
+    fragm.appendChild(content);
+
+    // speak btn
     const btn = document.createElement('span');
     btn.classList.add('hwh_hlw_speak_btn');
+    btn.classList.add('result_speak_btn');
     btn.innerHTML = `<img src="${chrome.runtime.getURL('read.svg')}"/>`;
-    panelEle.appendChild(btn);
+    fragm.appendChild(btn);
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       speak(result, LangMap[targetLang]);
     });
+    panelEle.innerHTML = '';
+    panelEle.appendChild(fragm);
+
     setTimeout(() => {
       // 获取元素的宽高
       const ow = panelEle.offsetWidth;
@@ -359,8 +430,28 @@ function connectToBackground() {
   });
 
   port.onMessage.addListener(function (data) {
-    if (data && data.result) {
-      generateResultPanel(data.result.data);
+    if (data && data.message === 'translate_result') {
+      if (data.result) {
+        generateResultPanel(data.result.data);
+      }
+    } else if (data.message === 'phonetic') {
+      if (phoneticEle) {
+        const dictStr = data.result.dict;
+        if (dictStr) {
+          const dict = JSON.parse(dictStr);
+          const phonetic = dict.word_result.simple_means.symbols[0].ph_am;
+          phoneticEle.innerHTML = `<span>/${phonetic}/</span>`;
+          const speakBtn = document.createElement('span');
+          speakBtn.innerHTML = `<img src="${chrome.runtime.getURL('read.svg')}"/>`;
+          speakBtn.classList.add('hwh_hlw_speak_btn');
+          speakBtn.addEventListener('click', (e) => {
+            speak(hwh_currentSelectText);
+          });
+          phoneticEle.appendChild(speakBtn);
+        } else {
+          phoneticEle.style.display = 'none';
+        }
+      }
     } else if (response && response.error) {
       console.error('Error:', response.error);
     }

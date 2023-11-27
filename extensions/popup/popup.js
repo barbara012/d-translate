@@ -6,12 +6,6 @@ const resultEle = document.getElementById('result');
 const alternativesEle = document.getElementById('alternatives');
 const speakBtn = document.getElementById('speak');
 
-const BaiDuAppId = '20231122001888376';
-// 密钥
-const BaiDuKey = 'oikztxg1Afbn8vlgyT6B';
-
-const BaiDuSalt = 'hwh_hlw';
-
 let lang = 'ZH';
 let port = null;
 const summitHandle = () => {
@@ -43,22 +37,6 @@ textEle.addEventListener('keydown', (e) => {
   }
 });
 
-speakBtn.addEventListener('click', (e) => {
-  var text = resultEle.innerText;
-
-  // 创建 SpeechSynthesisUtterance 对象
-  var utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'en-US'; // 设置语言为英语（美国）
-
-  // 获取发音音标
-  utterance.addEventListener('boundary', function (event) {
-    console.log('Phoneme boundary:', event, event.charIndex, event.elapsedTime);
-  });
-
-  // 朗读文本
-  window.speechSynthesis.speak(utterance);
-});
-
 function connectToBackground() {
   port = chrome.runtime.connect({name: 'hwh_hlw_content_script'});
 
@@ -68,7 +46,7 @@ function connectToBackground() {
   });
 
   port.onMessage.addListener(function (response) {
-    if (response && response.result) {
+    if (response && response.result && response.message === 'translate_result') {
       resultEle.innerText = response.result.data;
       if (response.result.alternatives && response.result.alternatives.length > 0) {
         alternativesEle.style.display = 'flex';
