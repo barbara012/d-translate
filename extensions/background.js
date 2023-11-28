@@ -26,6 +26,14 @@ const BaiduDetectLangMap = {
   JA: 'jp'
 };
 
+// 判断一个是不是单词 用空格分割或者_。如果是中文就不用判断了
+const isWord = (text) => {
+  if (text.match(/[\u4e00-\u9fa5]/)) {
+    return false;
+  }
+  return text.split(/[\s_]/).length === 1;
+};
+
 const detectLang = (text) => {
   return new Promise((resolve, reject) => {
     fetch(`${googleDetectApiUrl}?key=${googleApiKey}`, {
@@ -204,7 +212,9 @@ chrome.runtime.onConnect.addListener(function (port) {
             });
         })
         .finally(() => {
-          getPhonetic(data.text, BaiduLangMap[data.targetLang], port);
+          if (isWord(data.text)) {
+            getPhonetic(data.text, BaiduLangMap[data.targetLang], port);
+          }
         });
     } else if (data.message === 'speak') {
       chrome.tts.speak(data.text, data.targetLang ? {lang: data.targetLang} : undefined);
