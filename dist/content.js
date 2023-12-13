@@ -37,10 +37,15 @@
   content: "";
   position: absolute;
   top: 8px;
-  right: 0;
   height: 8px;
   width: 1px;
   background-color: #cdcdcd;
+}
+.hwh_hlw_select_menu .hwh_hlw_translate_btn::before {
+  right: 0;
+}
+.hwh_hlw_select_menu .hwh_hlw_speak_btn::before {
+  left: 0;
 }
 .hwh_hlw_select_menu select {
   border: none;
@@ -252,11 +257,12 @@
   const generateSelectMenus = () => {
     if (translateToolEle) return translateToolEle;
     const wrapper = document.createElement('div');
-    const shadow = wrapper.attachShadow({mode: 'open'});
+    const shadow = wrapper.attachShadow({ mode: 'open' });
     const toolStyle = document.createElement('style');
     toolStyle.textContent = TranslateToolStyle;
     const selectMenus = document.createElement('div');
     const btn = document.createElement('button');
+    const speakBtn = document.createElement('button');
     const select = document.createElement('select');
     select.innerHTML = `<option value="ZH">🇨🇳中文</option>
   <option value="EN">🇬🇧英语</option>
@@ -271,10 +277,17 @@
     select.classList.add(SelectLangClassName);
     select.classList.add(EventBlockClassName);
     btn.innerHTML = '<span>🐶</span>翻译';
+    speakBtn.innerHTML = `<img src="${chrome.runtime.getURL('read.svg')}"/>`;
+    speakBtn.classList.add('hwh_hlw_speak_btn');
+
     selectMenus.appendChild(btn);
     selectMenus.appendChild(select);
+    selectMenus.appendChild(speakBtn);
     select.addEventListener('change', langChange);
     btn.addEventListener('click', buttonClickHandle);
+    speakBtn.addEventListener('click', (e) => {
+      speak(hwh_currentSelectText);
+    });
 
     shadow.appendChild(toolStyle);
     shadow.appendChild(selectMenus);
@@ -290,7 +303,7 @@
     if (!resultPanelEle) {
       resultPanelEle = document.createElement('div');
       resultPanelEle.classList.add(EventBlockClassName);
-      shadow = resultPanelEle.attachShadow({mode: 'open'});
+      shadow = resultPanelEle.attachShadow({ mode: 'open' });
       const resultPanelStyle = document.createElement('style');
       resultPanelStyle.textContent = ResultPanelStyle;
       panelEle = document.createElement('div');
@@ -419,7 +432,7 @@
   });
 
   function connectToBackground() {
-    port = chrome.runtime.connect({name: 'hwh_hlw_content_script'});
+    port = chrome.runtime.connect({ name: 'hwh_hlw_content_script' });
 
     port.onDisconnect.addListener(function () {
       console.log('Connection to background invalidated. Reconnecting...');
